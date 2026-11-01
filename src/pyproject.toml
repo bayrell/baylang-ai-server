@@ -6,11 +6,19 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi",
+    "uvicorn[standard]",
     "jinja2",
+    "pydantic>=2.9",
+    "pyjwt",
+    "bcrypt",
+    "pydantic-ai",
 ]
 
 [dependency-groups]
 dev = [
     "workers-py",
-    "workers-runtime-sdk"
+    "workers-runtime-sdk",
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
 ]

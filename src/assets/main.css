@@ -1,0 +1,177 @@
+:root
+{
+    --bg: #0b0e13;
+    --surface: #12161f;
+    --surface-2: #171c27;
+    --border: rgba(148, 163, 184, 0.16);
+    --text: #e6eaf2;
+    --text-muted: #8b97ad;
+    --accent: #34d399;
+    --accent-2: #22d3ee;
+    --danger: #f87171;
+    --radius: 12px;
+}
+
+*
+{
+    box-sizing: border-box;
+}
+
+html,
+body
+{
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body
+{
+    background:
+        radial-gradient(1100px 520px at 12% -10%, rgba(52, 211, 153, 0.10), transparent 60%),
+        radial-gradient(900px 480px at 95% 0%, rgba(34, 211, 238, 0.08), transparent 55%),
+        var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a
+{
+    color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- */
+/* Кнопки                                                            */
+/* ---------------------------------------------------------------- */
+.btn
+{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    white-space: nowrap;
+}
+
+.btn:disabled
+{
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn:not(:disabled):hover
+{
+    transform: translateY(-1px);
+}
+
+.btn--primary
+{
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #05221c;
+    font-weight: 600;
+}
+
+.btn--ghost
+{
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-muted);
+}
+
+.btn--ghost:hover
+{
+    color: var(--text);
+    border-color: rgba(148, 163, 184, 0.35);
+}
+
+.btn--danger
+{
+    background: transparent;
+    border-color: rgba(248, 113, 113, 0.35);
+    color: var(--danger);
+}
+
+.btn--danger:hover
+{
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.btn--block
+{
+    width: 100%;
+}
+
+/* ---------------------------------------------------------------- */
+/* Поля ввода                                                        */
+/* ---------------------------------------------------------------- */
+.field
+{
+    display: block;
+    margin-bottom: 14px;
+}
+
+.field__label
+{
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.field__input
+{
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field__input::placeholder
+{
+    color: #64748b;
+}
+
+.field__input:focus
+{
+    border-color: rgba(52, 211, 153, 0.55);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12);
+}
+
+/* ---------------------------------------------------------------- */
+/* Скроллбары                                                        */
+/* ---------------------------------------------------------------- */
+*::-webkit-scrollbar
+{
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track
+{
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb
+{
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover
+{
+    background: rgba(148, 163, 184, 0.35);
+}
