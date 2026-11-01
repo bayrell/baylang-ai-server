@@ -1,3 +1,12 @@
+<style scoped>
+.index
+{
+    text-align: center;
+    padding: 80px 0;
+    color: var(--text-muted);
+}
+</style>
+
 <template>
     <div class="index">
         <h1>BayLang AI</h1>
@@ -17,12 +26,3 @@ export default {
     },
 }
 </script>
-
-<style scoped>
-.index
-{
-    text-align: center;
-    padding: 80px 0;
-    color: var(--text-muted);
-}
-</style>

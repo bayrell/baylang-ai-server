@@ -1,58 +1,3 @@
-<template>
-    <div class="auth">
-        <form class="auth__card" @submit.prevent="model.submit()">
-            <h1 class="auth__title">Вход</h1>
-            <p class="auth__subtitle">Войдите, чтобы открыть свои чаты и настройки.</p>
-
-            <label class="field">
-                <span class="field__label">Email</span>
-                <input
-                    v-model="model.state.email"
-                    class="field__input"
-                    type="email"
-                    autocomplete="email"
-                    placeholder="user@example.com"
-                />
-            </label>
-
-            <label class="field">
-                <span class="field__label">Пароль</span>
-                <input
-                    v-model="model.state.password"
-                    class="field__input"
-                    type="password"
-                    autocomplete="current-password"
-                    placeholder="••••••••"
-                />
-            </label>
-
-            <p class="auth__error" v-if="model.state.error">{{ model.state.error }}</p>
-
-            <button class="btn btn--primary btn--block" type="submit" :disabled="model.state.loading">
-                {{ model.state.loading ? "Входим…" : "Войти" }}
-            </button>
-
-            <p class="auth__footer">
-                Нет аккаунта?
-                <a href="#" @click.prevent="model.goRegister()">Зарегистрироваться</a>
-            </p>
-        </form>
-    </div>
-</template>
-
-<script>
-export default {
-    name: "LoginPage",
-
-    computed: {
-        model()
-        {
-            return this.$layout.getPage("LoginPageModel");
-        },
-    },
-}
-</script>
-
 <style scoped>
 .auth
 {
@@ -109,3 +54,58 @@ export default {
     color: var(--accent);
 }
 </style>
+
+<template>
+    <div class="auth">
+        <form class="auth__card" @submit.prevent="model.submit()">
+            <h1 class="auth__title">Вход</h1>
+            <p class="auth__subtitle">Войдите, чтобы открыть свои чаты и настройки.</p>
+
+            <label class="field">
+                <span class="field__label">Email</span>
+                <input
+                    v-model="model.state.email"
+                    class="field__input"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="user@example.com"
+                />
+            </label>
+
+            <label class="field">
+                <span class="field__label">Пароль</span>
+                <input
+                    v-model="model.state.password"
+                    class="field__input"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="••••••••"
+                />
+            </label>
+
+            <p class="auth__error" v-if="model.state.error">{{ model.state.error }}</p>
+
+            <button class="btn btn--primary btn--block" type="submit" :disabled="model.state.loading">
+                {{ model.state.loading ? "Входим…" : "Войти" }}
+            </button>
+
+            <p class="auth__footer">
+                Нет аккаунта?
+                <a href="#" @click.prevent="model.goRegister()">Зарегистрироваться</a>
+            </p>
+        </form>
+    </div>
+</template>
+
+<script>
+export default {
+    name: "LoginPage",
+
+    computed: {
+        model()
+        {
+            return this.$layout.getPage("LoginPageModel");
+        },
+    },
+}
+</script>

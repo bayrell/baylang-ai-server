@@ -1,82 +1,3 @@
-<template>
-    <div class="chat">
-        <header class="chat__header">
-            <div class="chat__info">
-                <h1 class="chat__title">{{ model.state.title || "Чат" }}</h1>
-                <span class="chat__agent" v-if="model.state.agentName">Агент: {{ model.state.agentName }}</span>
-            </div>
-            <button class="btn btn--ghost" @click="model.newChat()">＋ Новый чат</button>
-        </header>
-
-        <p class="chat__error" v-if="model.state.error">{{ model.state.error }}</p>
-
-        <div class="chat__messages" ref="messages">
-            <p class="chat__empty" v-if="!model.state.loading && !model.state.messages.length">
-                Напишите первое сообщение — агент ответит в реальном времени.
-            </p>
-
-            <div
-                v-for="(message, index) in model.state.messages"
-                :key="index"
-                class="message"
-                :class="message.role === 'user' ? 'message--user' : 'message--assistant'"
-            >
-                <div class="message__role">
-                    {{ message.role === "user" ? "Вы" : "Агент" }}
-                </div>
-                <div class="message__content">{{ message.content }}</div>
-            </div>
-
-            <div class="message message--assistant" v-if="model.state.typing && !model.state.streaming">
-                <div class="message__role">Агент</div>
-                <div class="message__content message__content--typing">печатает…</div>
-            </div>
-        </div>
-
-        <form class="chat__composer" @submit.prevent="model.send()">
-            <textarea
-                class="field__input chat__input"
-                v-model="model.state.input"
-                rows="3"
-                placeholder="Напишите сообщение… (Enter — отправить, Shift+Enter — перенос строки)"
-                @keydown="model.onKeydown($event)"
-            ></textarea>
-
-            <button class="btn btn--primary" type="submit" :disabled="model.state.typing">
-                {{ model.state.typing ? "Отправка…" : "Отправить" }}
-            </button>
-        </form>
-    </div>
-</template>
-
-<script>
-export default {
-    name: "ChatPage",
-
-    computed: {
-        model()
-        {
-            return this.$layout.getPage("ChatPageModel");
-        },
-    },
-
-    watch: {
-        "model.state.messages": {
-            deep: true,
-            handler()
-            {
-                this.$nextTick(() => {
-                    const box = this.$refs.messages;
-                    if (box) {
-                        box.scrollTop = box.scrollHeight;
-                    }
-                });
-            },
-        },
-    },
-}
-</script>
-
 <style scoped>
 .chat
 {
@@ -193,3 +114,82 @@ export default {
     font-family: inherit;
 }
 </style>
+
+<template>
+    <div class="chat">
+        <header class="chat__header">
+            <div class="chat__info">
+                <h1 class="chat__title">{{ model.state.title || "Чат" }}</h1>
+                <span class="chat__agent" v-if="model.state.agentName">Агент: {{ model.state.agentName }}</span>
+            </div>
+            <button class="btn btn--ghost" @click="model.newChat()">＋ Новый чат</button>
+        </header>
+
+        <p class="chat__error" v-if="model.state.error">{{ model.state.error }}</p>
+
+        <div class="chat__messages" ref="messages">
+            <p class="chat__empty" v-if="!model.state.loading && !model.state.messages.length">
+                Напишите первое сообщение — агент ответит в реальном времени.
+            </p>
+
+            <div
+                v-for="(message, index) in model.state.messages"
+                :key="index"
+                class="message"
+                :class="message.role === 'user' ? 'message--user' : 'message--assistant'"
+            >
+                <div class="message__role">
+                    {{ message.role === "user" ? "Вы" : "Агент" }}
+                </div>
+                <div class="message__content">{{ message.content }}</div>
+            </div>
+
+            <div class="message message--assistant" v-if="model.state.typing && !model.state.streaming">
+                <div class="message__role">Агент</div>
+                <div class="message__content message__content--typing">печатает…</div>
+            </div>
+        </div>
+
+        <form class="chat__composer" @submit.prevent="model.send()">
+            <textarea
+                class="field__input chat__input"
+                v-model="model.state.input"
+                rows="3"
+                placeholder="Напишите сообщение… (Enter — отправить, Shift+Enter — перенос строки)"
+                @keydown="model.onKeydown($event)"
+            ></textarea>
+
+            <button class="btn btn--primary" type="submit" :disabled="model.state.typing">
+                {{ model.state.typing ? "Отправка…" : "Отправить" }}
+            </button>
+        </form>
+    </div>
+</template>
+
+<script>
+export default {
+    name: "ChatPage",
+
+    computed: {
+        model()
+        {
+            return this.$layout.getPage("ChatPageModel");
+        },
+    },
+
+    watch: {
+        "model.state.messages": {
+            deep: true,
+            handler()
+            {
+                this.$nextTick(() => {
+                    const box = this.$refs.messages;
+                    if (box) {
+                        box.scrollTop = box.scrollHeight;
+                    }
+                });
+            },
+        },
+    },
+}
+</script>

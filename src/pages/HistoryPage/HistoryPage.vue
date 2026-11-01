@@ -1,81 +1,3 @@
-<template>
-    <div class="history">
-        <header class="history__header">
-            <div>
-                <h1 class="history__title">История чатов</h1>
-                <p class="history__subtitle">Показано {{ model.state.chats.length }} из {{ model.state.total }}</p>
-            </div>
-
-            <div class="history__actions">
-                <select class="field__input history__select" v-model="model.state.selectedAgent">
-                    <option :value="null">Без агента</option>
-                    <option v-for="agent in model.state.agents" :key="agent.id" :value="agent.id">
-                        {{ agent.name }}
-                    </option>
-                </select>
-                <button class="btn btn--primary" @click="model.createChat()">＋ Новый чат</button>
-            </div>
-        </header>
-
-        <div class="history__filters">
-            <input
-                class="field__input history__search"
-                v-model="model.state.query"
-                placeholder="Поиск по названию чата…"
-                @input="model.debouncedLoad()"
-            />
-
-            <select class="field__input history__select" v-model="model.state.filter" @change="model.load()">
-                <option value="all">Все</option>
-                <option value="today">Сегодня</option>
-                <option value="week">Неделя</option>
-                <option value="month">Месяц</option>
-            </select>
-
-            <button class="btn btn--ghost" @click="model.resetFilter()">Сбросить</button>
-        </div>
-
-        <p class="history__error" v-if="model.state.error">{{ model.state.error }}</p>
-
-        <p class="history__empty" v-if="!model.state.loading && !model.state.chats.length">
-            Пока нет ни одного чата. Создайте первый — и он появится здесь.
-        </p>
-
-        <ul class="chat-list">
-            <li
-                v-for="chat in model.state.chats"
-                :key="chat.id"
-                class="chat-list__item"
-                @click="model.openChat(chat)"
-            >
-                <div class="chat-list__main">
-                    <span class="chat-list__title">{{ chat.title }}</span>
-                    <span class="chat-list__meta">
-                        <span v-if="chat.agent_name">{{ chat.agent_name }}</span>
-                        <span>{{ chat.message_count || 0 }} сообщ.</span>
-                        <span>{{ model.formatDate(chat.updated_at) }}</span>
-                    </span>
-                </div>
-
-                <button class="chat-list__delete" title="Удалить" @click.stop="model.removeChat(chat)">✕</button>
-            </li>
-        </ul>
-    </div>
-</template>
-
-<script>
-export default {
-    name: "HistoryPage",
-
-    computed: {
-        model()
-        {
-            return this.$layout.getPage("HistoryPageModel");
-        },
-    },
-}
-</script>
-
 <style scoped>
 .history__header
 {
@@ -222,3 +144,81 @@ export default {
     }
 }
 </style>
+
+<template>
+    <div class="history">
+        <header class="history__header">
+            <div>
+                <h1 class="history__title">История чатов</h1>
+                <p class="history__subtitle">Показано {{ model.state.chats.length }} из {{ model.state.total }}</p>
+            </div>
+
+            <div class="history__actions">
+                <select class="field__input history__select" v-model="model.state.selectedAgent">
+                    <option :value="null">Без агента</option>
+                    <option v-for="agent in model.state.agents" :key="agent.id" :value="agent.id">
+                        {{ agent.name }}
+                    </option>
+                </select>
+                <button class="btn btn--primary" @click="model.createChat()">＋ Новый чат</button>
+            </div>
+        </header>
+
+        <div class="history__filters">
+            <input
+                class="field__input history__search"
+                v-model="model.state.query"
+                placeholder="Поиск по названию чата…"
+                @input="model.debouncedLoad()"
+            />
+
+            <select class="field__input history__select" v-model="model.state.filter" @change="model.load()">
+                <option value="all">Все</option>
+                <option value="today">Сегодня</option>
+                <option value="week">Неделя</option>
+                <option value="month">Месяц</option>
+            </select>
+
+            <button class="btn btn--ghost" @click="model.resetFilter()">Сбросить</button>
+        </div>
+
+        <p class="history__error" v-if="model.state.error">{{ model.state.error }}</p>
+
+        <p class="history__empty" v-if="!model.state.loading && !model.state.chats.length">
+            Пока нет ни одного чата. Создайте первый — и он появится здесь.
+        </p>
+
+        <ul class="chat-list">
+            <li
+                v-for="chat in model.state.chats"
+                :key="chat.id"
+                class="chat-list__item"
+                @click="model.openChat(chat)"
+            >
+                <div class="chat-list__main">
+                    <span class="chat-list__title">{{ chat.title }}</span>
+                    <span class="chat-list__meta">
+                        <span v-if="chat.agent_name">{{ chat.agent_name }}</span>
+                        <span>{{ chat.message_count || 0 }} сообщ.</span>
+                        <span>{{ model.formatDate(chat.updated_at) }}</span>
+                    </span>
+                </div>
+
+                <button class="chat-list__delete" title="Удалить" @click.stop="model.removeChat(chat)">✕</button>
+            </li>
+        </ul>
+    </div>
+</template>
+
+<script>
+export default {
+    name: "HistoryPage",
+
+    computed: {
+        model()
+        {
+            return this.$layout.getPage("HistoryPageModel");
+        },
+    },
+}
+</script>

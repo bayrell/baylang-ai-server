@@ -1,3 +1,60 @@
+<style scoped>
+.auth
+{
+    display: grid;
+    place-items: center;
+    min-height: 70vh;
+}
+
+.auth__card
+{
+    width: 100%;
+    max-width: 400px;
+    padding: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.auth__title
+{
+    margin: 0 0 6px;
+    font-size: 24px;
+}
+
+.auth__subtitle
+{
+    margin: 0 0 24px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.auth__error
+{
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    color: #fca5a5;
+    font-size: 13px;
+}
+
+.auth__footer
+{
+    margin: 18px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.auth__footer a
+{
+    color: var(--accent);
+}
+</style>
+
 <template>
     <div class="auth">
         <form class="auth__card" @submit.prevent="model.submit()">
@@ -74,60 +131,3 @@ export default {
     },
 }
 </script>
-
-<style scoped>
-.auth
-{
-    display: grid;
-    place-items: center;
-    min-height: 70vh;
-}
-
-.auth__card
-{
-    width: 100%;
-    max-width: 400px;
-    padding: 32px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-}
-
-.auth__title
-{
-    margin: 0 0 6px;
-    font-size: 24px;
-}
-
-.auth__subtitle
-{
-    margin: 0 0 24px;
-    color: var(--text-muted);
-    font-size: 14px;
-}
-
-.auth__error
-{
-    margin: 0 0 14px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: rgba(248, 113, 113, 0.12);
-    border: 1px solid rgba(248, 113, 113, 0.35);
-    color: #fca5a5;
-    font-size: 13px;
-}
-
-.auth__footer
-{
-    margin: 18px 0 0;
-    font-size: 13px;
-    color: var(--text-muted);
-    text-align: center;
-}
-
-.auth__footer a
-{
-    color: var(--accent);
-}
-</style>
