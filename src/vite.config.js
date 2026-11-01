@@ -7,13 +7,14 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "src"),
+            // Исходники фронтенда лежат плоско в src/, поэтому "@" — это сам каталог src.
+            "@": path.resolve(__dirname, "."),
         },
     },
 
     build: {
         // Сборка складывается в src/dist и раздаётся FastAPI-приложением.
-        outDir: "src/dist",
+        outDir: "dist",
         emptyOutDir: true,
         assetsDir: "assets",
     },

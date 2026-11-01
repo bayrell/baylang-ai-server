@@ -40,8 +40,12 @@ build_frontend()
 {
     echo "==> Сборка frontend (Vue 3 + Vite)"
     if command -v npm >/dev/null 2>&1; then
-        npm install --no-audit --no-fund
-        npm run build
+        # package.json лежит в src/, там же корень Vite (index.html).
+        (
+            cd src
+            npm install --no-audit --no-fund
+            npm run build
+        )
     else
         echo "Ошибка: npm не найден. Установите Node.js 20+." >&2
         return 1
@@ -106,7 +110,11 @@ deploy_cloudflare()
     echo "==> Сборка frontend и деплой в Cloudflare Workers"
     build_frontend
     if command -v npx >/dev/null 2>&1; then
-        npx wrangler deploy
+        # wrangler.jsonc лежит рядом с бэкендом — в src/.
+        (
+            cd src
+            npx wrangler deploy
+        )
     else
         echo "Ошибка: npx не найден. Установите Node.js 20+." >&2
         return 1
@@ -124,14 +132,17 @@ run_dev()
     BACKEND_PID=$!
     trap 'kill ${BACKEND_PID} 2>/dev/null || true' EXIT
 
-    npm install --no-audit --no-fund
-    npm run dev
+    (
+        cd src
+        npm install --no-audit --no-fund
+        npm run dev
+    )
 }
 
 clean()
 {
     echo "==> Очистка артефактов"
-    rm -rf src/dist
+    rm -rf src/dist src/node_modules
     find src -type d -name "__pycache__" -prune -exec rm -rf {} + 2>/dev/null || true
     rm -rf "${DATA_DIR}"
 }

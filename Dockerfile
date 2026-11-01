@@ -2,17 +2,21 @@
 
 ###############################################################################
 # Stage 1 — Frontend (Vue 3 + Vite)
-# Собираем SPA в src/dist, который затем отдаёт FastAPI.
+# Собираем SPA в dist, который затем отдаёт FastAPI.
+# Исходники фронтенда лежат плоско в src/, поэтому корень Vite — сам src/.
 ###############################################################################
 FROM node:22-alpine AS frontend
 
 WORKDIR /build
 
-COPY package.json package-lock.json* ./
+COPY src/package.json ./
 RUN npm install --no-audit --no-fund
 
-COPY index.html vite.config.js ./
-COPY src ./src
+COPY src/index.html src/vite.config.js ./
+COPY src/main.js ./
+COPY src/pages ./pages
+COPY src/services ./services
+COPY src/assets ./assets
 
 RUN npm run build
 
@@ -43,7 +47,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Код приложения и собранный фронтенд.
 COPY src /app/src
-COPY --from=frontend /build/src/dist /app/src/dist
+COPY --from=frontend /build/dist /app/src/dist
 
 RUN mkdir -p /app/data \
     && useradd --create-home --uid 10001 baylang \

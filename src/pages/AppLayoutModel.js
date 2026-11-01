@@ -2,7 +2,7 @@
  * Глобальная модель приложения: хранит роутер и модели всех страниц.
  * Создаётся в main.js и устанавливается в globalProperties Vue.
  */
-import { Router } from "@/lib/Router";
+import { Router } from "@/pages/Router";
 
 import IndexPageModel from "@/pages/IndexPage/IndexPageModel";
 import LoginPageModel from "@/pages/LoginPage/LoginPageModel";

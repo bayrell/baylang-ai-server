@@ -15,12 +15,19 @@
 
 ## Структура проекта
 
+Фронтенд и backend лежат в одном каталоге `src/`. Исходники фронтенда расположены
+плоско: `index.html` — корень Vite-сборки, `package.json` лежит рядом с ним,
+поэтому npm-команды выполняются **из каталога `src/`**.
+
 ```
 src/
 ├── app.py                  Точка входа для Docker (uvicorn app:create_app --factory)
 ├── main.py                 Точка входа для Cloudflare Workers
+├── index.html              HTML-точка входа Vite (корень frontend-сборки)
 ├── main.js                 Точка входа Vue-приложения
-├── App.vue                 Корневой компонент
+├── vite.config.js          Конфигурация Vite (alias "@" → src/, outDir "dist")
+├── package.json            Зависимости frontend (npm install / npm run build — в src/)
+├── wrangler.jsonc          Конфигурация Cloudflare Workers + binding D1 "DB"
 ├── core/                   Ядро Python (DI, БД, репозитории, сервисы, маршруты)
 │   ├── container.py        DI-контейнер: register / singleton / get
 │   ├── app.py              Сборка FastAPI-приложения
@@ -31,12 +38,15 @@ src/
 │   ├── schemas/            Pydantic-схемы API
 │   ├── services/           ChatService, AgentFactory, провайдеры/модели
 │   └── routes/             API-маршруты (/api/...)
-├── lib/Router.js           Простой роутер (url → route → модель страницы)
-├── layouts/                AppLayoutModel + AppLayout.vue
 ├── pages/                  Страницы: пара «<Name>Page.vue» + «<Name>PageModel.js»
-├── services/               API-клиент с авто-обновлением токена
+│   ├── App.vue             Корневой компонент
+│   ├── AppLayout.vue       Шапка и контейнер страницы
+│   ├── AppLayoutModel.js   Глобальная модель: роутер + модели всех страниц
+│   ├── Router.js           Простой роутер (url → route → модель страницы)
+│   └── BasePageModel.js    Базовый класс модели страницы
+├── services/               HTTP-клиент: ApiService, AuthApi и экземпляр `api`
 ├── assets/                 Стили
-└── dist/                   Сборка Vue (генерируется Vite)
+└── dist/                   Сборка Vue (генерируется Vite, раздаётся FastAPI)
 ```
 
 ## API
@@ -59,6 +69,7 @@ src/
 | GET/POST/PUT/DELETE | `/api/models`      | Модели                          | Auth   |
 | GET/POST/PUT/DELETE | `/api/agents`      | Агенты                          | Auth   |
 | GET    | `/api/health`               | Health-check                    | Public |
+| GET    | `/api/info`                 | Название и версия приложения    | Public |
 
 ## Переменные окружения
 
@@ -93,7 +104,8 @@ chmod +x build.sh
 pip install -r src/requirements.txt
 cd src && uvicorn app:create_app --factory --reload --port 8000
 
-# Frontend (в отдельном терминале)
+# Frontend (в отдельном терминале) — npm-команды выполняются в src/
+cd src
 npm install
 npm run dev        # http://localhost:5173, /api проксируется на :8000
 ```

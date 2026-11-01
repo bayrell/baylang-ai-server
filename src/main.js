@@ -7,7 +7,7 @@
 import { createApp, reactive } from "vue";
 
 import App from "@/pages/App.vue";
-import { AppLayoutModel } from "@/layouts/AppLayoutModel";
+import { AppLayoutModel } from "@/pages/AppLayoutModel";
 import "./assets/main.css";
 
 /* Create layout */
