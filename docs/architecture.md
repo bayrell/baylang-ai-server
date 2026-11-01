@@ -1,6 +1,17 @@
 Backend: FastApi Docker + Cloudflare
 Frontend: VueJS + Model
 
+Структура проекта:
+- src/assets - Assets
+- src/dist - Сборка Vuejs
+- src/main.js - Точка входя для vuejs
+- src/main.py - Точка входа для Cloudflare
+- src/app.py - Точка входа для Docker
+- src/core - Ядро Python
+- src/plugins - Плагины
+- src/pages - папка со страницами
+- src/pages/IndexPage - папка со страницей. Находятся файлы IndexPage.vue и IndexPageModel.js
+
 Требуется создать Container DI в python. Функции для работы с контейнером:
 - register(name, f)
 - singleton(name, f)
@@ -80,10 +91,6 @@ class Default(WorkerEntrypoint):
 ```
 
 Frontend:
-
-Структура проекта:
-- pages - папка со страницами
-- pages/IndexPage - папка со страницей. Находятся файлы IndexPage.vue и IndexPageModel.js
 
 В одной папке должен быть компонент + модель страницы. Компонент - рендер страницы и обработка event. Модель хранит state, данные и бизнес логику.
 
