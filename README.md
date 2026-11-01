@@ -1,131 +1,190 @@
-# BayLang AI Server
+# BayLang AI
 
-**BayLang AI** — веб-приложение для общения с ИИ-агентами: чаты с историей, настройка провайдеров, моделей и агентов.
+**BayLang AI** — веб-приложение для общения с ИИ-агентами: чаты с сохранённой историей,
+настройка провайдеров, моделей и «персон» (агентов).
 
-**Стек:** FastAPI (Cloudflare Workers / Docker) · Vue 3 · pydantic-ai · D1 / SQLite
+**Стек:** FastAPI + pydantic-ai (backend) · Vue 3 + Vite (frontend) · SQLite / Cloudflare D1 · Docker / Cloudflare Workers
 
-## Функционал
+> 📘 **Структура проекта, справочник API, архитектура и правила работы с кодом описаны в
+> [AGENTS.md](AGENTS.md).** Этот файл отвечает только на два вопроса: *что это за проект*
+> и *как его запустить*.
 
-- **Авторизация** — регистрация и вход по email + пароль, JWT-токены (access + refresh), разграничение доступа к данным пользователей.
-- **Чат с пользователем** — общение с ИИ-агентом через pydantic-ai, с опциональным стримингом ответа (SSE).
-- **История чатов** — select list с последними **50 чатами**, фильтр и поиск по названию, возможность создать новый чат.
-- **Настройка агентов** — «персона» бота: системный промпт + выбранная модель.
-- **Настройка моделей** — название модели, провайдер, температура, max_tokens и т.п.
-- **Настройка провайдеров** — название, URL, API key. Провайдер по умолчанию — **OpenRouter**, у которого есть возможность задать список upstream-провайдеров через запятую (параметр `only`).
+---
 
-## Структура проекта
+## Возможности
 
-Фронтенд и backend лежат в одном каталоге `src/`. Исходники фронтенда расположены
-плоско: `index.html` — корень Vite-сборки, `package.json` лежит рядом с ним,
-поэтому npm-команды выполняются **из каталога `src/`**.
+- **Авторизация** — регистрация и вход по email + пароль, пара JWT-токенов
+  (access + refresh), автоматическое обновление access-токена на фронтенде,
+  разграничение доступа к данным пользователей.
+- **Чат с агентом** — общение с «персоной» через pydantic-ai: полный контекст диалога
+  сохраняется между запросами, ответ можно получать постепенно (SSE-стриминг) или целиком.
+- **История чатов** — список последних 50 чатов с поиском по названию и фильтром
+  (все / сегодня / неделя / месяц), переименование, переключение агента и удаление.
+- **Настройка провайдеров** — название, URL и API-ключ. Для OpenRouter дополнительно
+  задаётся список upstream-провайдеров через запятую (параметр `only`).
+- **Настройка моделей** — привязка к провайдеру, имя LLM-модели, `temperature`, `max_tokens`.
+- **Настройка агентов** — системный промпт + выбранная модель.
 
-```
-src/
-├── app.py                  Точка входа для Docker (uvicorn app:create_app --factory)
-├── main.py                 Точка входа для Cloudflare Workers
-├── index.html              HTML-точка входа Vite (корень frontend-сборки)
-├── main.js                 Точка входа Vue-приложения
-├── vite.config.js          Конфигурация Vite (alias "@" → src/, outDir "dist")
-├── package.json            Зависимости frontend (npm install / npm run build — в src/)
-├── wrangler.jsonc          Конфигурация Cloudflare Workers + binding D1 "DB"
-├── core/                   Ядро Python (DI, БД, репозитории, сервисы, маршруты)
-│   ├── container.py        DI-контейнер: register / singleton / get
-│   ├── app.py              Сборка FastAPI-приложения
-│   ├── auth.py             Регистрация / вход / refresh / logout
-│   ├── security.py         bcrypt + JWT
-│   ├── database/           Абстракция БД: SQLite и Cloudflare D1
-│   ├── repositories/       Record-репозитории (SQL-запросы)
-│   ├── schemas/            Pydantic-схемы API
-│   ├── services/           ChatService, AgentFactory, провайдеры/модели
-│   └── routes/             API-маршруты (/api/...)
-├── pages/                  Страницы: пара «<Name>Page.vue» + «<Name>PageModel.js»
-│   ├── App.vue             Корневой компонент
-│   ├── AppLayout.vue       Шапка и контейнер страницы
-│   ├── AppLayoutModel.js   Глобальная модель: роутер + модели всех страниц
-│   ├── Router.js           Простой роутер (url → route → модель страницы)
-│   └── BasePageModel.js    Базовый класс модели страницы
-├── services/               HTTP-клиент: ApiService, AuthApi и экземпляр `api`
-├── assets/                 Стили
-└── dist/                   Сборка Vue (генерируется Vite, раздаётся FastAPI)
-```
+---
 
-## API
+## Как это устроено (кратко)
 
-| Метод  | URL                         | Описание                        | Доступ |
-|--------|-----------------------------|---------------------------------|--------|
-| POST   | `/api/auth/register`        | Регистрация                     | Public |
-| POST   | `/api/auth/login`           | Вход, выдача токенов            | Public |
-| POST   | `/api/auth/refresh`         | Обновление access-токена        | Public |
-| POST   | `/api/auth/logout`          | Инвалидация refresh-токена      | Auth   |
-| GET    | `/api/auth/me`              | Текущий пользователь            | Auth   |
-| GET    | `/api/chats`                | Список чатов (`q`, `filter`, `limit=50`) | Auth |
-| POST   | `/api/chats`                | Создать чат                     | Auth   |
-| GET    | `/api/chats/{id}`           | Чат с сообщениями               | Auth   |
-| PATCH  | `/api/chats/{id}`           | Переименовать / сменить агента  | Auth   |
-| DELETE | `/api/chats/{id}`           | Удалить чат                     | Auth   |
-| POST   | `/api/chats/{id}/messages`  | Сообщение агенту (без стриминга)| Auth   |
-| POST   | `/api/chats/{id}/stream`    | Сообщение агенту (SSE)          | Auth   |
-| GET/POST/PUT/DELETE | `/api/providers`   | Провайдеры                      | Auth   |
-| GET/POST/PUT/DELETE | `/api/models`      | Модели                          | Auth   |
-| GET/POST/PUT/DELETE | `/api/agents`      | Агенты                          | Auth   |
-| GET    | `/api/health`               | Health-check                    | Public |
-| GET    | `/api/info`                 | Название и версия приложения    | Public |
+Доменная цепочка выстроена последовательно: **провайдер → модель → агент → чат**.
+Провайдер отвечает за доступ к LLM (URL + ключ), модель — за параметры генерации,
+агент — за системный промпт, чат — за историю общения и сохранённый контекст pydantic-ai.
 
-## Переменные окружения
+**Backend** — FastAPI с собственным DI-контейнером и строгим делением на слои:
+маршруты → сервисы → Record-репозитории → абстракция базы данных. SQL живёт только
+в репозиториях, схема БД — один общий список миграций для SQLite и Cloudflare D1.
 
-| Переменная        | По умолчанию                  | Назначение                        |
-|-------------------|-------------------------------|-----------------------------------|
-| `JWT_SECRET`      | `baylang-dev-secret-change-me`| Секрет подписи JWT                |
-| `ACCESS_TOKEN_TTL`| `1800`                        | TTL access-токена, сек             |
-| `REFRESH_TOKEN_TTL`| `604800`                      | TTL refresh-токена, сек            |
-| `DATABASE_PATH`   | `./data/baylang.sqlite3`      | Путь к SQLite-файлу               |
-| `PORT` / `HOST`   | `8000` / `0.0.0.0`            | Параметры запуска                 |
+**Frontend** — Vue 3 без внешнего роутера и UI-кита: собственный History-API роутер
+и паттерн «страница = `.vue` + `Model.js`», где логика живёт в модели, а в компоненте —
+только рендер.
 
-## Сборка и запуск
+**Хранилище** — SQLite локально и в Docker, Cloudflare D1 в Workers; интерфейс БД
+одинаков, различается только реализация.
 
-### Docker (рекомендуется)
+---
+
+## Требования
+
+| Для чего | Что нужно |
+|----------|-----------|
+| Backend | Python ≥ 3.12 |
+| Frontend | Node.js ≥ 20 (в Docker-образе — `node:22-alpine`) |
+| Docker-вариант | Docker Engine |
+| Cloudflare-вариант | Аккаунт Cloudflare, `wrangler`, база D1 |
+
+---
+
+## Быстрый старт (Docker)
+
+Docker-образ многостадийный: **node:22-alpine** собирает Vue-приложение в `src/dist`,
+**python:3.12-slim** ставит зависимости и раздаёт собранный SPA вместе с API.
 
 ```bash
 chmod +x build.sh
 
 ./build.sh docker        # собрать образ baylang-ai:latest
 ./build.sh docker-run    # собрать и запустить контейнер на :8000
-./build.sh docker-logs   # логи контейнера
+./build.sh docker-logs   # смотреть логи
 ./build.sh docker-stop   # остановить и удалить контейнер
-./build.sh docker-push   # отправить образ в реестр
 ```
 
-Образ многостадийный: **node:22-alpine** собирает Vue-приложение в `src/dist`, **python:3.12-slim** ставит зависимости и раздаёт собранный SPA вместе с API. Данные SQLite хранятся в томе `/app/data`.
+Приложение будет доступно на <http://localhost:8000>, данные SQLite — в томе
+`./data` (в контейнере `/app/data`).
 
-### Локальная разработка
+Перед публикацией задайте собственный секрет подписи токенов:
 
 ```bash
-# Backend
-pip install -r src/requirements.txt
-cd src && uvicorn app:create_app --factory --reload --port 8000
+JWT_SECRET="ваш-длинный-секрет" ./build.sh docker-run
+```
 
-# Frontend (в отдельном терминале) — npm-команды выполняются в src/
+---
+
+## Локальная разработка
+
+Backend и frontend запускаются независимо, в двух терминалах.
+
+### Backend
+
+```bash
+pip install -r src/requirements.txt
+
+cd src
+uvicorn app:create_app --factory --reload --host 0.0.0.0 --port 8000
+```
+
+API доступно на <http://localhost:8000/api>, health-check — `GET /api/health`.
+Схема БД создаётся автоматически при старте, файл — `data/baylang.sqlite3`
+(переопределяется переменной `DATABASE_PATH`).
+
+### Frontend
+
+```bash
 cd src
 npm install
-npm run dev        # http://localhost:5173, /api проксируется на :8000
+npm run dev        # http://localhost:5173, запросы /api проксируются на :8000
 ```
 
-### Cloudflare Workers
+npm-команды выполняются **из каталога `src/`** — там лежат `package.json` и корень
+Vite-сборки (`index.html`). Прокси можно перенаправить переменной `API_URL`:
 
 ```bash
+API_URL=http://localhost:8000 npm run dev
+```
+
+### Одной командой
+
+```bash
+./build.sh dev       # установить зависимости, поднять backend :8000 и frontend :5173
+```
+
+### Сборка фронтенда отдельно
+
+```bash
+cd src && npm run build     # результат — в src/dist, его раздаёт FastAPI
+```
+
+---
+
+## Первый запуск
+
+1. Откройте приложение и зарегистрируйтесь — при регистрации автоматически создаётся
+   провайдер **OpenRouter** (по умолчанию).
+2. Откройте «Настройки → Провайдеры» и вставьте свой API-ключ OpenRouter.
+3. Создайте модель (имя LLM, `temperature`, `max_tokens`) и агента (системный промпт + модель).
+4. Создайте чат и начните общение.
+
+Ключи провайдеров никогда не возвращаются наружу в открытом виде — в ответах API они
+маскируются.
+
+---
+
+## Переменные окружения
+
+| Переменная         | По умолчанию                    | Назначение                       |
+|--------------------|---------------------------------|----------------------------------|
+| `JWT_SECRET`       | `baylang-dev-secret-change-me`  | Секрет подписи JWT (HS256)       |
+| `ACCESS_TOKEN_TTL` | `1800`                          | TTL access-токена, секунд         |
+| `REFRESH_TOKEN_TTL`| `604800`                        | TTL refresh-токена, секунд        |
+| `BCRYPT_ROUNDS`    | `12`                            | Раундов bcrypt                   |
+| `DATABASE_PATH`    | `./data/baylang.sqlite3`         | Файл SQLite                      |
+| `HOST`             | `0.0.0.0`                       | Хост uvicorn                     |
+| `PORT`             | `8000`                          | Порт uvicorn                     |
+| `LOG_LEVEL`        | `info`                          | Уровень логирования              |
+
+Значения по умолчанию — **dev-значения**: в production задайте `JWT_SECRET` явно.
+Для `build.sh` есть свои переменные: `IMAGE_NAME`, `IMAGE_TAG`, `CONTAINER_NAME`,
+`HOST_PORT`, `DATA_DIR`, `DOCKER`, `JWT_SECRET`.
+
+---
+
+## Команды build.sh
+
+| Команда               | Действие                                                |
+|-----------------------|---------------------------------------------------------|
+| `./build.sh backend`  | Установить Python-зависимости                           |
+| `./build.sh frontend` | `npm install` + `npm run build` в `src/`                |
+| `./build.sh dev`      | Локальный запуск: backend :8000 + frontend :5173         |
+| `./build.sh docker`   | Собрать Docker-образ                                    |
+| `./build.sh docker-run` | Собрать и запустить контейнер                          |
+| `./build.sh docker-logs` / `docker-stop` / `docker-push` | Логи / остановка / отправка в реестр |
+| `./build.sh cloudflare` | Сборка фронтенда + деплой в Cloudflare Workers         |
+| `./build.sh test`     | `pytest` (тестов в репозитории пока нет)                |
+| `./build.sh clean`    | Удалить `src/dist`, `node_modules`, `__pycache__`, `./data` |
+
+---
+
+## Деплой в Cloudflare Workers
+
+Worker запускает backend на Python (`python_workers`), база — Cloudflare D1.
+
+```bash
+cd src && npx wrangler d1 create baylang_ai     # создать базу
+# вписать реальный database_id в src/wrangler.jsonc
 ./build.sh cloudflare
 ```
 
-Перед деплоем укажите реальный `database_id` в `src/wrangler.jsonc` и создайте базу: `wrangler d1 create baylang_ai`.
-
-## Итог
-
-Реализован полный функционал **BayLang AI** по пяти модулям ТЗ:
-
-- **Авторизация** — JWT (access + refresh) с bcrypt-хешированием паролей, защита маршрутов через `Depends(get_current_user)` и автоматическое обновление токена на фронте.
-- **Онлайн-чат** — агент-цикл pydantic-ai с восстановлением полного контекста из `all_messages()`, стриминг через SSE и историей из последних 50 чатов с поиском и фильтром.
-- **Провайдеры** — название, URL и API-ключ; для OpenRouter дополнительно список upstream-провайдеров через запятую (`only`), маппится в `OpenRouterProviderConfig`.
-- **Модели** — связка «провайдер + название LLM-модели + температура/max_tokens», применяется через `OpenRouterModelSettings`.
-- **Агенты** — системный промпт + выбранная модель; сборка выполняется фабрикой агентов, зарегистрированной в DI-контейнере.
-
-**Вывод:** архитектура полностью соответствует ТЗ — единый DI-контейнер связывает Record-репозитории, сервисы и pydantic-схемы, а фронтенд следует паттерну «страница + модель» на Vue 3 с собственным роутером. Backend и Frontend собираются раздельно и поставляются единым Docker-образом.
+Имя воркера — `baylang_ai`, точка входа — `src/main.py`, binding базы — `DB`.
+Схема БД создаётся лениво при первом запросе.
